@@ -60,4 +60,28 @@ class WebPushNotifier:
                     self.store.remove_subscription(endpoint)
             except Exception as exc:  # noqa: BLE001 - 第三方推送客户端的异常类型并不统一
                 logger.warning("web push failed with %s", type(exc).__name__)
-        return delivered > 0
+        return deliver > 0
+class PushPlusNotifier:
+    def __init__(self, token: str):
+        self.token = token
+
+    def send(self, title: str, body: str, *, message_id: str) -> bool:
+        import urllib.request
+        payload = json.dumps({
+            "token": self.token,
+            "title": title or "小克🦊",
+            "content": body,
+            "template": "txt",
+        }).encode("utf-8")
+        req = urllib.request.Request(
+            "http://www.pushplus.plus/send",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                result = json.loads(resp.read().decode())
+                return result.get("code") == 200
+        except Exception:
+            logger.warning("pushplus send failed")
+            return False
