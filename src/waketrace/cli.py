@@ -21,7 +21,13 @@ from .storage import SQLiteStore
 def build_engine(settings: Settings, *, console: bool = False) -> WakeEngine:
     settings.ensure_runtime_dirs()
     store = SQLiteStore(settings.db_path)
-    notifier = ConsoleNotifier() if console else WebPushNotifier(settings, store)
+    if console:
+        notifier = ConsoleNotifier()
+    elif os.environ.get("WAKETRACE_PUSHPLUS_TOKEN"):
+        from .notifiers import PushPlusNotifier
+        notifier = PushPlusNotifier(os.environ["WAKETRACE_PUSHPLUS_TOKEN"])
+    else:
+        notifier = WebPushNotifier(settings, store)
     return WakeEngine(
         settings,
         store,
