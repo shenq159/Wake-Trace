@@ -87,7 +87,7 @@ class PushPlusNotifier:
             logger.warning("pushplus send failed")
             return False
 
-def build_notifier(settings: Settings, store: SQLiteStore) -> Notifier:
+    def build_notifier(settings: Settings, store: SQLiteStore) -> Notifier:
     """Create the same configured notifier for CLI and API/scheduler paths."""
     notifier_type = os.environ.get("WAKETRACE_NOTIFIER_TYPE", "webpush").strip().lower()
     if notifier_type == "pushplus":
