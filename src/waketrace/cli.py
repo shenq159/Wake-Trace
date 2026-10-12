@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 import argparse
 import json
 from datetime import UTC, datetime
@@ -12,7 +11,7 @@ from .config import Settings
 from .engine import WakeEngine
 from .lifeworld import build_lifeworld_tools
 from .models import WakeSeed
-from .notifiers import ConsoleNotifier, WebPushNotifier
+from .notifiers import ConsoleNotifier, build_notifier
 from .providers import OpenAICompatibleProvider
 from .scheduler import WakeScheduler
 from .storage import SQLiteStore
@@ -21,13 +20,7 @@ from .storage import SQLiteStore
 def build_engine(settings: Settings, *, console: bool = False) -> WakeEngine:
     settings.ensure_runtime_dirs()
     store = SQLiteStore(settings.db_path)
-    if console:
-        notifier = ConsoleNotifier()
-    elif os.environ.get("WAKETRACE_PUSHPLUS_TOKEN"):
-        from .notifiers import PushPlusNotifier
-        notifier = PushPlusNotifier(os.environ["WAKETRACE_PUSHPLUS_TOKEN"])
-    else:
-        notifier = WebPushNotifier(settings, store)
+    notifier = ConsoleNotifier() if console else build_notifier(settings, store)
     return WakeEngine(
         settings,
         store,
