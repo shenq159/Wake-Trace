@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Protocol
 
 from .config import Settings
@@ -60,7 +61,7 @@ class WebPushNotifier:
                     self.store.remove_subscription(endpoint)
             except Exception as exc:  # noqa: BLE001 - 第三方推送客户端的异常类型并不统一
                 logger.warning("web push failed with %s", type(exc).__name__)
-        return deliver > 0
+        return delivered > 0
 class PushPlusNotifier:
     def __init__(self, token: str):
         self.token = token
