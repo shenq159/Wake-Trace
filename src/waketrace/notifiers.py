@@ -75,7 +75,7 @@ class PushPlusNotifier:
             "template": "txt",
         }).encode("utf-8")
         req = urllib.request.Request(
-            "http://www.pushplus.plus/send",
+            "https://www.pushplus.plus/send",
             data=payload,
             headers={"Content-Type": "application/json"},
         )
@@ -86,3 +86,17 @@ class PushPlusNotifier:
         except Exception:
             logger.warning("pushplus send failed")
             return False
+
+def build_notifier(settings: Settings, store: SQLiteStore) -> Notifier:
+    """Create the same configured notifier for CLI and API/scheduler paths."""
+    notifier_type = os.environ.get("WAKETRACE_NOTIFIER_TYPE", "webpush").strip().lower()
+    if notifier_type == "pushplus":
+        token = os.environ.get("WAKETRACE_PUSHPLUS_TOKEN", "").strip()
+        if not token:
+            raise RuntimeError(
+                "WAKETRACE_NOTIFIER_TYPE=pushplus but WAKETRACE_PUSHPLUS_TOKEN is empty"
+            )
+        return PushPlusNotifier(token)
+    if notifier_type == "webpush":
+        return WebPushNotifier(settings, store)
+    raise ValueError(f"Unsupported WAKETRACE_NOTIFIER_TYPE: {notifier_type}")
