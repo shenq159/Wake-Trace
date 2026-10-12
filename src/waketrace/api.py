@@ -18,7 +18,7 @@ from .engine import WakeEngine
 from .lifeworld import build_lifeworld_tools
 from .mcp_server import build_mcp_server
 from .models import WakeSeed
-from .notifiers import WebPushNotifier
+from .notifiers import build_notifier
 from .providers import OpenAICompatibleProvider
 from .scheduler import WakeScheduler
 from .storage import SQLiteStore
@@ -65,7 +65,7 @@ def create_app(
             settings,
             store,
             OpenAICompatibleProvider(settings),
-            build_lifeworld_tools(store),
+            build_notifier(settings, store),,
             WebPushNotifier(settings, store),
         )
 
