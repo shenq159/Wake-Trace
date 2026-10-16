@@ -59,9 +59,11 @@ class WebPushNotifier:
                 status = getattr(getattr(exc, "response", None), "status_code", None)
                 if status in {404, 410} and endpoint:
                     self.store.remove_subscription(endpoint)
-            except Exception as exc:  # noqa: BLE001 - 第三方推送客户端的异常类型并不统一
+            except Exception as exc:
                 logger.warning("web push failed with %s", type(exc).__name__)
         return delivered > 0
+
+
 class PushPlusNotifier:
     def __init__(self, token: str):
         self.token = token
@@ -87,7 +89,8 @@ class PushPlusNotifier:
             logger.warning("pushplus send failed")
             return False
 
-    def build_notifier(settings: Settings, store: SQLiteStore) -> Notifier:
+
+def build_notifier(settings: Settings, store: SQLiteStore) -> Notifier:
     """Create the same configured notifier for CLI and API/scheduler paths."""
     notifier_type = os.environ.get("WAKETRACE_NOTIFIER_TYPE", "webpush").strip().lower()
     if notifier_type == "pushplus":
